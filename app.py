@@ -473,7 +473,10 @@ def text_handler(update, context):
 
     else:
         update.message.reply_text("❓ พิมพ์ เช่น: ฝุ่น / อุณหภูมิ / ความชื้น / ทั้งหมด")
-
+        
+def test_command(update, context):
+    print("ได้รับข้อความจาก Telegram:", update.message.text)
+    update.message.reply_text("✅ บอทตอบกลับแล้ว!")
 # ================= Register =================
 dispatcher.add_handler(CommandHandler("start", start))
 dispatcher.add_handler(CallbackQueryHandler(button_handler))
@@ -486,6 +489,24 @@ dispatcher.add_handler(CommandHandler("removeadmin", remove_admin))
 job_queue.run_repeating(dust_monitor, interval=60, first=10)
 
 print("🤖 Bot is running...")
+try:
+    bot_info = updater.bot.get_me()
+    print("เชื่อมต่อ Telegram สำเร็จ")
+    print("Bot username:", bot_info.username)
+except Exception as e:
+    print("Telegram connection error:", repr(e))
+    raise
 updater.bot.delete_webhook()
+dispatcher.add_handler(CommandHandler("test", test_command))
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("telegram").setLevel(logging.DEBUG)
+
+def error_handler(update, context):
+    print("❌ เกิดข้อผิดพลาดในบอท:")
+    print(repr(context.error))
+
+dispatcher.add_error_handler(error_handler)
 updater.start_polling()
 updater.idle()
